@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 
 Project("{00D7A9C3-F50D-5F6B-1626-CD43CFCB0DA0}") = "KanaVR", "Assembly-CSharp.csproj", "{F5404136-0E66-193A-0B6E-2CAD78D23FAA}"
 EndProject
+Project("{00D7A9C3-F50D-5F6B-1626-CD43CFCB0DA0}") = "KanaVR", "Assembly-CSharp-Editor.csproj", "{CE67287A-D470-A694-54A8-85AAC34591D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{F5404136-0E66-193A-0B6E-2CAD78D23FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5404136-0E66-193A-0B6E-2CAD78D23FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5404136-0E66-193A-0B6E-2CAD78D23FAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE67287A-D470-A694-54A8-85AAC34591D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE67287A-D470-A694-54A8-85AAC34591D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE67287A-D470-A694-54A8-85AAC34591D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE67287A-D470-A694-54A8-85AAC34591D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
