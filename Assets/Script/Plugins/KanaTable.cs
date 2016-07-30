@@ -6,40 +6,82 @@ namespace AssemblyCSharp
 {
 	public class KanaTable
 	{
-		List<Kana> kana = new List<Kana>();
+		List<Kana> kanas = new List<Kana>();
 
 		public KanaTable ()
 		{
-			string fileData = System.IO.File.ReadAllText("Assets/Script/kana.csv");
+			TextAsset txt = (TextAsset)Resources.Load("kanadata", typeof(TextAsset));
+			string fileData = txt.text;
+			TextAsset txtLikes = (TextAsset)Resources.Load("kanalikes", typeof(TextAsset));
+			string fileLikes = txtLikes.text;
 			string[] lines = fileData.Split('\n');
 			foreach (string line in lines) 
 			{
 				string[] lineData = (line.Trim()).Split(';');
 				if (lineData.Length >= 3) 
 				{
-					kana.Add (new Kana (lineData [0], lineData [1], lineData [2]));
+					Kana kana = new Kana (lineData [0], lineData [1], lineData [2]);
+					kanas.Add (kana);
+					// kana.likes = FindSimilarKana (kana);
+				}
+			}
+			string[] likeLines = fileLikes.Split ('\n');
+			foreach (string line in likeLines) 
+			{
+				string[] lineData = (line.Trim()).Split(';');
+
+				if (lineData.Length == 2) 
+				{
+					int i = 0;
+					string[] kanaTypes = { "hiragana", "katakana" };
+					foreach (string kanaType in kanaTypes) {
+						string[] brothers = lineData [i].Split (',');
+						foreach (string brother in brothers) {
+							Kana kana = FindByRomaji (brother);
+							if (kana != null) {
+								foreach (string tmpBrother in brothers) {
+									Kana tmpKana = FindByRomaji (tmpBrother);
+									if (tmpKana != null && tmpKana.romaji != kana.romaji) {
+										switch (kanaType) {
+										case "hiragana":
+											kana.hiraganaLikes.Add(tmpKana);
+											break;
+										case "katakana":
+											kana.katakanaLikes.Add(tmpKana);
+											break;
+										}
+									}
+								}
+							}
+						}
+						i++;
+					}
 				}
 			}
 		}
 
 		public Kana FindByKana(string kanaChar)
 		{
-			return kana.Find (x => (x.hiragana == kanaChar || x.katakana == kanaChar));
+			return kanas.Find (x => (x.hiragana == kanaChar || x.katakana == kanaChar));
 		}
 
 		public Kana FindByRomaji(string romaji)
 		{
-			return kana.Find (x => x.romaji == romaji);
+			return kanas.Find (x => x.romaji == romaji);
 		}
 
 		public Kana FindByHiragana(string hiragana)
 		{
-			return kana.Find (x => x.hiragana == hiragana);
+			return kanas.Find (x => x.hiragana == hiragana);
 		}
 
 		public Kana FindByKatakana(string katakana)
 		{
-			return kana.Find (x => x.katakana == katakana);
+			return kanas.Find (x => x.katakana == katakana);
+		}
+
+		public Kana GetRandomKana() {
+			return kanas[new System.Random().Next( 0, kanas.Count -1 )];
 		}
 	}
 
@@ -48,12 +90,16 @@ namespace AssemblyCSharp
 		public string romaji { get; set; }
 		public string hiragana { get; set; }
 		public string katakana { get; set; }
+		public List<Kana> katakanaLikes { get; set; }
+		public List<Kana> hiraganaLikes { get; set; }
 
 		public Kana(string romaji, string hiragana, string katakana)
 		{
 			this.romaji = romaji;
 			this.hiragana = hiragana;
 			this.katakana = katakana;
+			this.hiraganaLikes = new List<Kana> ();
+			this.katakanaLikes = new List<Kana> ();
 		}
 	}
 }
