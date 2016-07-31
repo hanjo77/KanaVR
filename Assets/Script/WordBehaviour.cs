@@ -22,7 +22,6 @@ public class WordBehaviour : MonoBehaviour  {
 
 	// Use this for initialization
 	void Start () {
-		// _word = Instantiate (Resources.Load (kanaType+"/"+kana, typeof(GameObject)) as GameObject);
 		WriteText(textValue);
 		_word = gameObject;
 
@@ -32,7 +31,7 @@ public class WordBehaviour : MonoBehaviour  {
 
 		Transform vrHead = GvrViewer.Instance.gameObject.transform;
 		Vector3 colliderSize = _word.GetComponent<BoxCollider> ().size;
-		_headPos = new Vector3 (colliderSize.x / -2, vrHead.position.y + (colliderSize.z / 2), 0);
+		_headPos = vrHead.position;
 
 		Quaternion rotation = Quaternion.LookRotation(vrHead.position - position);
 		_word.transform.rotation = rotation;
@@ -63,7 +62,7 @@ public class WordBehaviour : MonoBehaviour  {
 			_word.transform.position, 
 			_headPos, 
 			speed * Time.deltaTime);
-		if (Vector3.Distance (_headPos, _word.transform.position) < .1f) {
+		if (Vector3.Distance (_headPos, _word.transform.position) < 1f) {
 			transform.parent.gameObject.GetComponent<GameBehaviour>().RemoveWord (this);
 		}
 	}
@@ -105,12 +104,6 @@ public class WordBehaviour : MonoBehaviour  {
 				cursor += rend.bounds.size.x + padding;
 			}
 		}
-//		BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
-//		FitToChildren (boxCollider);
-//		Teleport teleport = gameObject.AddComponent<Teleport> ();
-//		EventTrigger eventTrigger = gameObject.AddComponent<EventTrigger> ();
-// 		eventTrigger.OnPointerEnter = teleport.OnGazeEnter;
-//		eventTrigger.OnPointerExit = teleport.OnGazeExit;
 	}
 
 	void AddBoxCollider (GameObject wordObject) {
@@ -126,6 +119,7 @@ public class WordBehaviour : MonoBehaviour  {
 				bounds = childRenderer.bounds;
 				hasBounds = true;
 			}
+			childRenderer.gameObject.AddComponent<MeshExploder> ();
 		}
 		collider.center = bounds.center - wordObject.transform.position;
 		collider.size = bounds.size;

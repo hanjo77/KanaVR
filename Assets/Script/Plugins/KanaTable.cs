@@ -18,11 +18,10 @@ namespace AssemblyCSharp
 			foreach (string line in lines) 
 			{
 				string[] lineData = (line.Trim()).Split(';');
-				if (lineData.Length >= 3) 
+				if (lineData.Length >= 3 && lineData[0].ToLower() != "hiragana") 
 				{
 					Kana kana = new Kana (lineData [0], lineData [1], lineData [2]);
 					kanas.Add (kana);
-					// kana.likes = FindSimilarKana (kana);
 				}
 			}
 			string[] likeLines = fileLikes.Split ('\n');
@@ -81,7 +80,7 @@ namespace AssemblyCSharp
 		}
 
 		public Kana GetRandomKana() {
-			return kanas[new System.Random().Next( 0, kanas.Count -1 )];
+			return kanas[new System.Random().Next( 0, kanas.Count -2 )];
 		}
 	}
 
