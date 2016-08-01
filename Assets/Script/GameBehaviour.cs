@@ -10,30 +10,55 @@ public class GameBehaviour : MonoBehaviour {
 	public float speed = 10f;
 	public float gazeWait = 2f;
 	public int maxSelection = 4;
-	public string kanaType = "hiragana";
+	public string kanaType = "katakana";
 	public WordBehaviour activeKana;
 	public Kana currentKana;
 	public int score = 0;
 	public int lives = 5;
+	public KanaTable kanaTable;
+	public string soundVoice = "Kyoko";
 
 	public float activationTime;
-	private KanaTable _kanaTable;
-	private List<Kana> activeKanas = new List<Kana> ();
+	private List<Kana> _activeKanas = new List<Kana> ();
+	private GameObject _gameHUD;
+	private GameObject _maleButton;
+	private GameObject _femaleButton;
 
 	// Use this for initialization
 	void Start () {
-		_kanaTable = new KanaTable ();
-		StartRound ();
-		GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
-		GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
+		_gameHUD = GameObject.FindGameObjectsWithTag ("GameHUD") [0];
+		_gameHUD.SetActive (false);
+
+		kanaTable = new KanaTable ();
+		ShowMenu ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
+		if (lives < 0) {
+			EndGame ();
+		}
 		if (activeKana && activationTime >= 0 && Time.time - activationTime >= gazeWait) {
 			activationTime = -1f;
 			activeKana.selected = true;
-			if (activeKana != null && _kanaTable.FindByKana (activeKana.textValue).romaji == currentKana.romaji) {
+			if (activeKana.textValue == "ひらがな") {
+				kanaType = "hiragana";
+				StartGame ();
+			} else if (activeKana.textValue == "カタカナ") {
+				kanaType = "katakana";
+				StartGame ();
+			} else if (activeKana.textValue == "かたまり") {
+				kanaType = "katamari";
+				StartGame ();
+			} else if (activeKana.textValue == "male") {
+				soundVoice = "Otoya";
+				_femaleButton.GetComponent<WordBehaviour> ().PaintObject (Color.blue);
+				_maleButton.GetComponent<WordBehaviour> ().PaintObject (Color.yellow);
+			} else if (activeKana.textValue == "female") {
+				soundVoice = "Kyoko";
+				_femaleButton.GetComponent<WordBehaviour> ().PaintObject (Color.yellow);
+				_maleButton.GetComponent<WordBehaviour> ().PaintObject (Color.blue);
+			} else if (activeKana != null && kanaTable.FindByKana (activeKana.textValue).romaji == currentKana.romaji) {
 				activeKana.PaintObject (Color.green);
 				score++;
 				GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
@@ -47,12 +72,69 @@ public class GameBehaviour : MonoBehaviour {
 		}
 	}
 
+	void ShowMenu() {
+		GameObject title = PlaceKana ("かな", Color.yellow, new Vector3(0, 25, 50));
+		title.GetComponent<WordBehaviour> ().isStatic = true;
+		title.GetComponent<WordBehaviour> ().unMovable = true;
+		title.GetComponent<WordBehaviour> ().scale = 2f;
+		GameObject hiraganaButton = PlaceKana ("ひらがな", Color.blue, new Vector3(-50, 0, 50));
+		hiraganaButton.GetComponent<WordBehaviour> ().unMovable = true;
+		GameObject katakanaButton = PlaceKana ("カタカナ", Color.blue, new Vector3(50, 0, 50));
+		katakanaButton.GetComponent<WordBehaviour> ().unMovable = true;
+		GameObject allButton = PlaceKana ("かたまり", Color.blue, new Vector3(0, -20, 50));
+		allButton.GetComponent<WordBehaviour> ().unMovable = true;
+
+		GameObject vpiceLabel = PlaceKana ("voice", Color.yellow, new Vector3(0, 0, 50));
+		vpiceLabel.GetComponent<WordBehaviour> ().isStatic = true;
+		vpiceLabel.GetComponent<WordBehaviour> ().unMovable = true;
+		_maleButton = PlaceKana ("male", (soundVoice == "Otoya" ? Color.yellow : Color.blue), new Vector3(-10, 0, 50));
+		_maleButton.GetComponent<WordBehaviour> ().unMovable = true;
+		_femaleButton = PlaceKana ("female", (soundVoice == "Kyoko" ? Color.yellow : Color.blue), new Vector3(10, 0, 50));
+		_femaleButton.GetComponent<WordBehaviour> ().unMovable = true;
+		// StartRound ();
+	}
+
+	void StartGame() {
+		lives = 5;
+		score = 0;
+		MeshExploder[] exploders = GetComponentsInChildren<MeshExploder> ();
+		foreach (MeshExploder exploder in exploders) {
+			exploder.Explode ();
+			GameObject.Destroy (exploder.gameObject);
+		}
+		StartRound ();
+	}
+
+	void EndGame() {
+		MeshExploder[] exploders = GetComponentsInChildren<MeshExploder> ();
+		foreach (MeshExploder exploder in exploders) {
+			exploder.Explode ();
+			GameObject.Destroy (exploder.gameObject);
+		}
+		_gameHUD.SetActive (false);
+		ShowMenu ();
+	}
+
 	void StartRound() {
-		currentKana = _kanaTable.GetRandomKana();
+		string tmpKanaType = "";
+		if (kanaType == "katamari") {
+			int rnd = Random.Range (0, 2);
+			tmpKanaType = (rnd == 0 ? "hiragana" : "katakana");
+		} else {
+			tmpKanaType = kanaType;
+		}
+		_gameHUD.SetActive (true);
+		GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
+		GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
+
+		currentKana = kanaTable.GetRandomKana();
+		while (currentKana.romaji == "Romaji") {
+			currentKana = kanaTable.GetRandomKana();
+		}
 		GameObject.Find ("RomajiText").GetComponent<TextMesh> ().text = currentKana.romaji;
 
 		List<Kana> kanas = new List<Kana>();
-		switch (kanaType) {
+		switch (tmpKanaType) {
 		case "hiragana":
 			kanas = currentKana.hiraganaLikes;
 			break;
@@ -66,10 +148,10 @@ public class GameBehaviour : MonoBehaviour {
 		kanas.Add (currentKana);
 		foreach (Kana tmpKana in kanas) {
 			 
-			Vector3 target = new Vector3 (Random.Range (-50, 50), Random.Range (-50, 50), Random.Range (-50, 50)).normalized;
+			Vector3 target = new Vector3 (Random.Range (-250, 250), Random.Range (-150, 150), Random.Range (250, 250)).normalized;
 
 			string text = "";
-			switch (kanaType) {
+			switch (tmpKanaType) {
 			case "hiragana":
 				text = tmpKana.hiragana;
 				break;
@@ -79,10 +161,9 @@ public class GameBehaviour : MonoBehaviour {
 			}
 
 			PlaceKana (text, Color.blue, target*startDistance);
-			activeKanas.Add (tmpKana);
+			_activeKanas.Add (tmpKana);
 		}
-		Debug.Log ("Play Sounds/" + currentKana.romaji); 
-		AudioClip ac = Resources.Load("Sounds/"+currentKana.romaji) as AudioClip;
+		AudioClip ac = Resources.Load("Sounds/" + soundVoice + "/" + currentKana.romaji) as AudioClip;
 		AudioSource.PlayClipAtPoint(ac, Vector3.zero);
 	}
 
@@ -91,8 +172,8 @@ public class GameBehaviour : MonoBehaviour {
 			exploder.Explode ();
 		}
 		GameObject.Destroy (word.gameObject);
-		activeKanas.Remove (_kanaTable.FindByKana(word.textValue));
-		if (activeKanas.Count <= 0) {
+		_activeKanas.Remove (kanaTable.FindByKana(word.textValue));
+		if (_activeKanas.Count <= 0) {
 			lives--;
 			GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
 			StartRound ();
@@ -108,7 +189,7 @@ public class GameBehaviour : MonoBehaviour {
 			children.Add (child.gameObject);
 		}
 		children.ForEach(child => Destroy(child));
-		activeKanas = new List<Kana> ();
+		_activeKanas = new List<Kana> ();
 	}
 
 	public GameObject PlaceKana(string text, Color color, Vector3 position) {

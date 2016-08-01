@@ -59,6 +59,10 @@ namespace AssemblyCSharp
 			}
 		}
 
+		public void Start()
+		{
+		}
+
 		public Kana FindByKana(string kanaChar)
 		{
 			return kanas.Find (x => (x.hiragana == kanaChar || x.katakana == kanaChar));
@@ -80,7 +84,7 @@ namespace AssemblyCSharp
 		}
 
 		public Kana GetRandomKana() {
-			return kanas[new System.Random().Next( 0, kanas.Count -2 )];
+			return kanas[new System.Random().Next( 1, kanas.Count -2 )];
 		}
 	}
 
