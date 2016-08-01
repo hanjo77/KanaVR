@@ -175,13 +175,6 @@ public class GameBehaviour : MonoBehaviour {
 
 	void StartRound() {
 		Resources.UnloadUnusedAssets ();
-		string tmpKanaType = "";
-		if (kanaType == "katamari") {
-			int rnd = Random.Range (0, 2);
-			tmpKanaType = (rnd == 0 ? "hiragana" : "katakana");
-		} else {
-			tmpKanaType = kanaType;
-		}
 		_gameHUD.SetActive (true);
 		GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
 		GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
@@ -192,17 +185,28 @@ public class GameBehaviour : MonoBehaviour {
 		}
 		GameObject.Find ("RomajiText").GetComponent<TextMesh> ().text = currentKana.romaji;
 
+		LoadKanas ();
+
+		_audioSource.clip = Resources.Load("Sounds/" + soundVoice + "/" + currentKana.romaji) as AudioClip;
+		_audioSource.PlayDelayed (.5f);
+	}
+
+	private void LoadKanas() {
 		List<Kana> kanas = new List<Kana>();
+		string tmpKanaType = "";
+		if (kanaType == "katamari") {
+			int rnd = Random.Range (0, 2);
+			tmpKanaType = (rnd == 0 ? "hiragana" : "katakana");
+		} else {
+			tmpKanaType = kanaType;
+		}
 		switch (tmpKanaType) {
 		case "hiragana":
-			kanas = currentKana.hiraganaLikes;
+			kanas = RandomizeAndCrop(currentKana.hiraganaLikes, maxSelection - 1);
 			break;
 		case "katakana":
-			kanas = currentKana.katakanaLikes;
+			kanas = RandomizeAndCrop(currentKana.katakanaLikes, maxSelection - 1);
 			break;
-		}
-		if (kanas.Count >= maxSelection) {
-			kanas = kanas.GetRange (0, maxSelection - 1);
 		}
 		kanas.Add (currentKana);
 		foreach (Kana tmpKana in kanas) {
@@ -233,8 +237,19 @@ public class GameBehaviour : MonoBehaviour {
 			PlaceKana (text, Color.blue, target);
 			_activeKanas.Add (tmpKana);
 		}
-		_audioSource.clip = Resources.Load("Sounds/" + soundVoice + "/" + currentKana.romaji) as AudioClip;
-		_audioSource.PlayDelayed (.5f);
+	}
+
+	private List<Kana> RandomizeAndCrop (List<Kana> list, int size) {
+		if (list.Count >= maxSelection) {
+			List<Kana> used = new List<Kana> ();
+			while (used.Count < size) {
+				Kana tmp = list[Random.Range(0, list.Count-1)];
+				list.Remove (tmp);
+				used.Add (tmp);
+			}
+			list = used;
+		}
+		return list;
 	}
 
 	private void SpeakWord(string word) {

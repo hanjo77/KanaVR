@@ -1,8 +1,8 @@
 hiragana;katakana
-a,o,me,mu,no.nu;a,u,ke,ge,ku,gu,ta,fu,bu,pu,ma,mu,me
+a,o,me,mu,no,nu;a,u,ke,ge,ku,gu,ta,fu,bu,pu,ma,mu,me
 e,u,fu,na,bu,pu;e,ko,go,ro,yo,yu,ni
 i,tsu,ko,go,shi,ni;i,ki,gi,re,ri,ru,to,do
-ka,ga,se,ze,ta,da;o,ka,ga,sa,za,ta,da,ho,bo.po,ne,na
+ka,ga,se,ze,ta,da;o,ka,ga,sa,za,ta,da,ho,bo,po,ne,na
 ke,ge,ha,ba,pa;ra,fu,bu,pu,su,zu,nu
 ki,gi,sa,za,chi,ji,di,ra,mo;se,ze,hi,bi,pi,ya
 ku,gu,shi,ji,he,be,pe;shi,so,ji,zo,tsu,du,no,n
@@ -12,7 +12,7 @@ su,zu,te,de;mi,yo,ni,no,yu,me,mo
 to,do,yo,sa,tsu,du;kya,kyo,kyu,gya,gyo,gyu
 hi,bi,pi,shi,ji;sha,sho,shu,ja,jo,ju,cha,cho,chu
 ho,bo,po,ha,ba,pa,ma;hya,hyo,hyu,bya,byo,byu,pya,pyo,pyu
-mi,ya,yo,yu;nya,nyo,nyu,mya,myo,myu,rya,ryo,ryu
+mi,ya,yo,yu,ne,nu;nya,nyo,nyu,mya,myo,myu,rya,ryo,ryu
 kya,kyo,kyu,gya,gyo,gyu;
 sha,sho,shu,ja,jo,ju,cha,cho,chu;
 hya,hyo,hyu,bya,byo,byu,pya,pyo,pyu;
