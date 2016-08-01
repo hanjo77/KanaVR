@@ -21,6 +21,7 @@ public class GameBehaviour : MonoBehaviour {
 	public float randomRangeX = 200;
 	public float randomRangeY = 100;
 	public float randomZ = 250;
+	public float backgroundVolume = .7f;
 
 	public float activationTime;
 	private List<Kana> _activeKanas = new List<Kana> ();
@@ -29,9 +30,18 @@ public class GameBehaviour : MonoBehaviour {
 	private GameObject _femaleButton;
 	private Prefs _prefs;
 	private bool _isPlaying;
+	private AudioSource _audioSource;
+	private AudioSource _bgAudioSource;
+	private Coroutine _waiter;
 
 	// Use this for initialization
 	void Start () {
+		_audioSource = gameObject.AddComponent<AudioSource> ();
+		_bgAudioSource = gameObject.AddComponent<AudioSource> ();
+		_bgAudioSource.clip = Resources.Load("Sounds/soundtrack") as AudioClip;
+		_bgAudioSource.loop = true;
+		_bgAudioSource.volume = backgroundVolume;
+		_bgAudioSource.Play ();
 		GameBehaviour b = this;
 		_prefs = new Prefs ();
 		_prefs.Load ();
@@ -54,29 +64,33 @@ public class GameBehaviour : MonoBehaviour {
 			activeKana.selected = true;
 			if (activeKana.textValue == "ひらがな") {
 				kanaType = "hiragana";
-				StartGame ();
+				_waiter = StartCoroutine (WaitForStart ());
 			} else if (activeKana.textValue == "カタカナ") {
 				kanaType = "katakana";
-				StartGame ();
+				_waiter = StartCoroutine (WaitForStart ());
 			} else if (activeKana.textValue == "かたまり") {
 				kanaType = "katamari";
-				StartGame ();
+				_waiter = StartCoroutine (WaitForStart ());
 			} else if (activeKana.textValue == "male") {
 				soundVoice = "Otoya";
+				SpeakWord ("konnichiwa");
 				_femaleButton.GetComponent<WordBehaviour> ().PaintObject (Color.blue);
 				_maleButton.GetComponent<WordBehaviour> ().PaintObject (Color.yellow);
 			} else if (activeKana.textValue == "female") {
 				soundVoice = "Kyoko";
+				SpeakWord ("konnichiwa");
 				_femaleButton.GetComponent<WordBehaviour> ().PaintObject (Color.yellow);
 				_maleButton.GetComponent<WordBehaviour> ().PaintObject (Color.blue);
 			} else if (activeKana != null && kanaTable.FindByKana (activeKana.textValue).romaji == currentKana.romaji) {
 				activeKana.PaintObject (Color.green);
 				score++;
+				SpeakWord ("sodesune");
 				GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
 				RemoveWords ();
-				StartRound ();
+				_waiter = StartCoroutine (WaitForRound ());
 			} else if (activeKana != null) {
 				activeKana.PaintObject (Color.red);
+				SpeakWord ("warui");
 				lives--;
 				GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
 			}
@@ -106,29 +120,61 @@ public class GameBehaviour : MonoBehaviour {
 		// StartRound ();
 	}
 
+	IEnumerator WaitForStart()
+	{
+		SpeakWord (kanaType);
+		RemoveWords ();
+		while (true) {
+			yield return new WaitForSeconds(3.0f);
+			StartGame ();
+			StopCoroutine (_waiter);
+		}
+	}
+
+	IEnumerator WaitForEnd()
+	{
+		while (true) {
+			yield return new WaitForSeconds(3.0f);
+			_gameHUD.SetActive (false);
+			SpeakWord ("gomennasai");
+			ShowMenu ();
+			StopCoroutine (_waiter);
+		}
+	}
+
+	IEnumerator WaitForRound()
+	{
+		GameObject.Find ("RomajiText").GetComponent<TextMesh> ().text = "";
+		while (true) {
+			yield return new WaitForSeconds(2.0f);
+			StartRound ();
+			StopCoroutine (_waiter);
+		}
+	}
+
 	void StartGame() {
 		_prefs.Save ();
 		lives = 5;
 		score = 0;
 		_isPlaying = true;
-		RemoveWords ();
 		StartRound ();
 	}
 
 	void EndGame() {
 		if (_isPlaying) {
+			_isPlaying = false;
 			MeshExploder[] exploders = GetComponentsInChildren<MeshExploder> ();
 			foreach (MeshExploder exploder in exploders) {
 				exploder.Explode ();
 				GameObject.Destroy (exploder.gameObject);
 			}
-			_gameHUD.SetActive (false);
-			ShowMenu ();
-			_isPlaying = false;
+			StopAllCoroutines ();
+			_waiter = StartCoroutine (WaitForEnd ());
 		}
 	}
 
 	void StartRound() {
+		Resources.UnloadUnusedAssets ();
 		string tmpKanaType = "";
 		if (kanaType == "katamari") {
 			int rnd = Random.Range (0, 2);
@@ -187,7 +233,12 @@ public class GameBehaviour : MonoBehaviour {
 			PlaceKana (text, Color.blue, target);
 			_activeKanas.Add (tmpKana);
 		}
-		AudioClip ac = Resources.Load("Sounds/" + soundVoice + "/" + currentKana.romaji) as AudioClip;
+		_audioSource.clip = Resources.Load("Sounds/" + soundVoice + "/" + currentKana.romaji) as AudioClip;
+		_audioSource.PlayDelayed (.5f);
+	}
+
+	private void SpeakWord(string word) {
+		AudioClip ac = Resources.Load("Sounds/" + soundVoice + "/_words/" + word) as AudioClip;
 		AudioSource.PlayClipAtPoint(ac, Vector3.zero);
 	}
 
@@ -208,10 +259,13 @@ public class GameBehaviour : MonoBehaviour {
 		}
 		GameObject.Destroy (word.gameObject);
 		_activeKanas.Remove (kanaTable.FindByKana(word.textValue));
-		if (_activeKanas.Count <= 0) {
+		if (_activeKanas.Count <= 0 && _isPlaying) {
 			lives--;
-			GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
-			StartRound ();
+			SpeakWord ("itaidesu");
+			if (GameObject.Find ("LivesText") != null) {
+				GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
+			}
+			_waiter = StartCoroutine(WaitForRound());
 		}
 	}
 

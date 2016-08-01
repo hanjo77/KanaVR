@@ -12,7 +12,6 @@ public class TitleBehaviour : MonoBehaviour  {
 	public Material material;
 	public Color color = Color.blue;
 
-	private GameObject _word;
 	private Vector3 _headPos;
 
 	public KanaTable kanaTable = new KanaTable ();
@@ -20,7 +19,6 @@ public class TitleBehaviour : MonoBehaviour  {
 	// Use this for initialization
 	void Start () {
 		WriteText(textValue);
-		_word = gameObject;
 
 		PaintObject (Color.blue);
 	}
