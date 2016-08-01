@@ -93,6 +93,7 @@
      <Compile Include="Assets\Scenes\FPS.cs" />
      <Compile Include="Assets\Script\GameBehaviour.cs" />
      <Compile Include="Assets\Script\Plugins\KanaTable.cs" />
+     <Compile Include="Assets\Script\Plugins\Prefs.cs" />
      <Compile Include="Assets\Script\SplashScreenBehaviour.cs" />
      <Compile Include="Assets\Script\TitleBehaviour.cs" />
      <Compile Include="Assets\Script\WordBehaviour.cs" />

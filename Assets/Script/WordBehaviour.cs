@@ -157,9 +157,15 @@ public class WordBehaviour : MonoBehaviour  {
 	public void OnPointerEnter(BaseEventData eventData)
 	{
 		GameObject selection = ((PointerEventData)eventData).pointerCurrentRaycast.gameObject;
-		PaintObject (Color.cyan);
-		eventData.selectedObject = selection;
 		GameBehaviour game = transform.parent.gameObject.GetComponent<GameBehaviour> ();
+		bool isActiveVoice = (
+			(game.soundVoice == "Otoya" && textValue == "male") ||
+			(game.soundVoice == "Kyoko" && textValue == "female")
+		);
+		if (!isActiveVoice) {
+			PaintObject (Color.cyan);
+		}
+		eventData.selectedObject = selection;
 		game.activationTime = Time.time;
 		game.activeKana = this;
 	}
@@ -167,11 +173,15 @@ public class WordBehaviour : MonoBehaviour  {
 	public void OnPointerExit(BaseEventData eventData)
 	{    
 		GameObject selection = ((PointerEventData)eventData).selectedObject;
-		if (!selected) {
-			PaintObject (Color.blue);
+		GameBehaviour game = transform.parent.gameObject.GetComponent<GameBehaviour> ();
+		bool isActiveVoice = (
+			(game.soundVoice == "Otoya" && textValue == "male") ||
+			(game.soundVoice == "Kyoko" && textValue == "female")
+		);
+		if (!selected || isActiveVoice) {
+			PaintObject (isActiveVoice ? Color.yellow : Color.blue);
 		}
 		eventData.selectedObject = null;
-		GameBehaviour game = transform.parent.gameObject.GetComponent<GameBehaviour> ();
 		game.activationTime = -1f;
 		game.activeKana = null;
 	}

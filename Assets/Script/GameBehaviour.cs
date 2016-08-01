@@ -17,15 +17,26 @@ public class GameBehaviour : MonoBehaviour {
 	public int lives = 5;
 	public KanaTable kanaTable;
 	public string soundVoice = "Kyoko";
+	public float minDist = 100;
+	public float randomRangeX = 200;
+	public float randomRangeY = 100;
+	public float randomZ = 250;
 
 	public float activationTime;
 	private List<Kana> _activeKanas = new List<Kana> ();
 	private GameObject _gameHUD;
 	private GameObject _maleButton;
 	private GameObject _femaleButton;
+	private Prefs _prefs;
+	private bool _isPlaying;
 
 	// Use this for initialization
 	void Start () {
+		GameBehaviour b = this;
+		_prefs = new Prefs ();
+		_prefs.Load ();
+		_prefs.SetAll(ref b);
+
 		_gameHUD = GameObject.FindGameObjectsWithTag ("GameHUD") [0];
 		_gameHUD.SetActive (false);
 
@@ -69,6 +80,7 @@ public class GameBehaviour : MonoBehaviour {
 				lives--;
 				GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
 			}
+			_prefs.voice = soundVoice;
 		}
 	}
 
@@ -95,24 +107,25 @@ public class GameBehaviour : MonoBehaviour {
 	}
 
 	void StartGame() {
+		_prefs.Save ();
 		lives = 5;
 		score = 0;
-		MeshExploder[] exploders = GetComponentsInChildren<MeshExploder> ();
-		foreach (MeshExploder exploder in exploders) {
-			exploder.Explode ();
-			GameObject.Destroy (exploder.gameObject);
-		}
+		_isPlaying = true;
+		RemoveWords ();
 		StartRound ();
 	}
 
 	void EndGame() {
-		MeshExploder[] exploders = GetComponentsInChildren<MeshExploder> ();
-		foreach (MeshExploder exploder in exploders) {
-			exploder.Explode ();
-			GameObject.Destroy (exploder.gameObject);
+		if (_isPlaying) {
+			MeshExploder[] exploders = GetComponentsInChildren<MeshExploder> ();
+			foreach (MeshExploder exploder in exploders) {
+				exploder.Explode ();
+				GameObject.Destroy (exploder.gameObject);
+			}
+			_gameHUD.SetActive (false);
+			ShowMenu ();
+			_isPlaying = false;
 		}
-		_gameHUD.SetActive (false);
-		ShowMenu ();
 	}
 
 	void StartRound() {
@@ -147,8 +160,19 @@ public class GameBehaviour : MonoBehaviour {
 		}
 		kanas.Add (currentKana);
 		foreach (Kana tmpKana in kanas) {
-			 
-			Vector3 target = new Vector3 (Random.Range (-250, 250), Random.Range (-150, 150), Random.Range (250, 250)).normalized;
+
+			Vector3 target = new Vector3 (
+				Random.Range (-randomRangeX, randomRangeX), 
+				Random.Range (-randomRangeY, randomRangeY), 
+				Random.Range (randomZ, randomZ)
+			).normalized*startDistance;
+			while (DistanceToKanas (target) < minDist) {
+				target = new Vector3 (
+					Random.Range (-randomRangeX, randomRangeX), 
+					Random.Range (-randomRangeY, randomRangeY), 
+					Random.Range (randomZ, randomZ)
+				).normalized*startDistance;
+			};
 
 			string text = "";
 			switch (tmpKanaType) {
@@ -160,11 +184,22 @@ public class GameBehaviour : MonoBehaviour {
 				break;
 			}
 
-			PlaceKana (text, Color.blue, target*startDistance);
+			PlaceKana (text, Color.blue, target);
 			_activeKanas.Add (tmpKana);
 		}
 		AudioClip ac = Resources.Load("Sounds/" + soundVoice + "/" + currentKana.romaji) as AudioClip;
 		AudioSource.PlayClipAtPoint(ac, Vector3.zero);
+	}
+
+	private float DistanceToKanas(Vector3 pos) {
+		float minDist = 100000;
+		foreach (Transform child in transform) {
+			float dist = Vector3.Distance (child.position, pos);
+			if (dist < minDist) {
+				minDist = dist;
+			}
+		}
+		return minDist;
 	}
 
 	public void RemoveWord(WordBehaviour word) {
@@ -184,11 +219,9 @@ public class GameBehaviour : MonoBehaviour {
 		foreach (MeshExploder exploder in gameObject.GetComponentsInChildren<MeshExploder>()) {
 			exploder.Explode ();
 		}
-		var children = new List<GameObject>();
 		foreach (Transform child in transform) {
-			children.Add (child.gameObject);
+			GameObject.Destroy(child.gameObject);
 		}
-		children.ForEach(child => Destroy(child));
 		_activeKanas = new List<Kana> ();
 	}
 
