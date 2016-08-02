@@ -11,6 +11,7 @@ public class GameBehaviour : MonoBehaviour {
 	public float gazeWait = 2f;
 	public int maxSelection = 4;
 	public string kanaType = "katakana";
+	public string tmpKanaType = "katakana";
 	public WordBehaviour activeKana;
 	public Kana currentKana;
 	public int score = 0;
@@ -83,6 +84,7 @@ public class GameBehaviour : MonoBehaviour {
 				_maleButton.GetComponent<WordBehaviour> ().PaintObject (Color.blue);
 			} else if (activeKana != null && kanaTable.FindByKana (activeKana.textValue).romaji == currentKana.romaji) {
 				activeKana.PaintObject (Color.green);
+				IncreaseKanaPoints ();
 				score++;
 				SpeakWord ("sodesune");
 				GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
@@ -91,10 +93,35 @@ public class GameBehaviour : MonoBehaviour {
 			} else if (activeKana != null) {
 				activeKana.PaintObject (Color.red);
 				SpeakWord ("warui");
+				DecreaseKanaPoints ();
 				lives--;
 				GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
 			}
 			_prefs.voice = soundVoice;
+		}
+	}
+
+	private void IncreaseKanaPoints() {
+		switch (tmpKanaType) {
+		case "hiragana":
+			kanaTable.FindByKana (activeKana.textValue).hiraganaPoints++;
+			break;
+		case "katakana":
+			kanaTable.FindByKana (activeKana.textValue).katakanaPoints++;
+			break;
+		}
+	}
+
+	private void DecreaseKanaPoints() {
+		switch (tmpKanaType) {
+		case "hiragana":
+			if (kanaTable.FindByKana (activeKana.textValue).hiraganaPoints > 0) 
+				kanaTable.FindByKana (activeKana.textValue).hiraganaPoints--;
+			break;
+		case "katakana":
+			if (kanaTable.FindByKana (activeKana.textValue).katakanaPoints > 0) 
+				kanaTable.FindByKana (activeKana.textValue).katakanaPoints--;
+			break;
 		}
 	}
 
@@ -174,14 +201,20 @@ public class GameBehaviour : MonoBehaviour {
 	}
 
 	void StartRound() {
+		if (kanaType == "katamari") {
+			int rnd = Random.Range (0, 2);
+			tmpKanaType = (rnd == 0 ? "hiragana" : "katakana");
+		} else {
+			tmpKanaType = kanaType;
+		}
 		Resources.UnloadUnusedAssets ();
 		_gameHUD.SetActive (true);
 		GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
 		GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
 
-		currentKana = kanaTable.GetRandomKana();
+		currentKana = kanaTable.GetRandomKana(tmpKanaType);
 		while (currentKana.romaji == "Romaji") {
-			currentKana = kanaTable.GetRandomKana();
+			currentKana = kanaTable.GetRandomKana(tmpKanaType);
 		}
 		GameObject.Find ("RomajiText").GetComponent<TextMesh> ().text = currentKana.romaji;
 
@@ -193,13 +226,6 @@ public class GameBehaviour : MonoBehaviour {
 
 	private void LoadKanas() {
 		List<Kana> kanas = new List<Kana>();
-		string tmpKanaType = "";
-		if (kanaType == "katamari") {
-			int rnd = Random.Range (0, 2);
-			tmpKanaType = (rnd == 0 ? "hiragana" : "katakana");
-		} else {
-			tmpKanaType = kanaType;
-		}
 		switch (tmpKanaType) {
 		case "hiragana":
 			kanas = RandomizeAndCrop(currentKana.hiraganaLikes, maxSelection - 1);
@@ -276,6 +302,7 @@ public class GameBehaviour : MonoBehaviour {
 		_activeKanas.Remove (kanaTable.FindByKana(word.textValue));
 		if (_activeKanas.Count <= 0 && _isPlaying) {
 			lives--;
+			DecreaseKanaPoints ();
 			SpeakWord ("itaidesu");
 			if (GameObject.Find ("LivesText") != null) {
 				GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);

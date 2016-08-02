@@ -83,8 +83,28 @@ namespace AssemblyCSharp
 			return kanas.Find (x => x.katakana == katakana);
 		}
 
-		public Kana GetRandomKana() {
-			return kanas[new System.Random().Next( 1, kanas.Count -2 )];
+		public Kana GetRandomKana(string kanaType) {
+			return FindMinKanas(kanaType)[new System.Random().Next( 1, kanas.Count -2 )];
+		}
+
+		public List<Kana> FindMinKanas(string kanaType) {
+			int min = 10000000;
+			foreach (Kana k in kanas) {
+				int value = k.hiraganaPoints;
+				if (kanaType == "katakana") {
+					value = k.katakanaPoints;
+				}
+				if (value < min) {
+					min = value;
+				}
+			}
+			switch (kanaType) {
+			case "hiragana":
+				return kanas.FindAll (k => k.hiraganaPoints == min);
+			case "katakana":
+				return kanas.FindAll (k => k.hiraganaPoints == min);
+			}
+			return new List<Kana> ();
 		}
 	}
 
@@ -95,6 +115,8 @@ namespace AssemblyCSharp
 		public string katakana { get; set; }
 		public List<Kana> katakanaLikes { get; set; }
 		public List<Kana> hiraganaLikes { get; set; }
+		public int hiraganaPoints { get; set; }
+		public int katakanaPoints { get; set; }
 
 		public Kana(string romaji, string hiragana, string katakana)
 		{
@@ -103,6 +125,8 @@ namespace AssemblyCSharp
 			this.katakana = katakana;
 			this.hiraganaLikes = new List<Kana> ();
 			this.katakanaLikes = new List<Kana> ();
+			this.hiraganaPoints = 0;
+			this.katakanaPoints = 0;
 		}
 	}
 }
