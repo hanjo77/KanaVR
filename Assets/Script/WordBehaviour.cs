@@ -32,15 +32,13 @@ public class WordBehaviour : MonoBehaviour  {
 		_word = gameObject;
 
 		AddBoxCollider (_word);
-		position.x -= ((_word.GetComponent<BoxCollider> ()).size.x / 2);
 		_word.transform.position = position;
 
 		Transform vrHead = GvrViewer.Instance.gameObject.transform;
 		Vector3 colliderSize = _word.GetComponent<BoxCollider> ().size;
-		_headPos = vrHead.position;
-		_headPos.x -= 5f;
-
-		Quaternion rotation = Quaternion.LookRotation(vrHead.position - position);
+		_headPos = vrHead.GetComponentInChildren<Camera>().transform.position;
+		Debug.DrawLine (_headPos, position);
+		Quaternion rotation = Quaternion.LookRotation(_headPos - position);
 		_word.transform.rotation = rotation;
 		_word.transform.Rotate (new Vector3(180, 0, 180));
 
@@ -99,6 +97,9 @@ public class WordBehaviour : MonoBehaviour  {
 					if (content.Substring (i, 1) == kana.katakana.Substring (kana.katakana.Length - 1, 1)) {
 						folder = "katakana/";
 					}
+					if (i > 0) { 
+						cursor += (scale * padding);
+					}
 					// Debug.Log (folder+kana.romaji);
 					go = Instantiate (Resources.Load (folder+kana.romaji, typeof(GameObject)) as GameObject);
 					Renderer rend = go.GetComponentInChildren<Renderer> ();
@@ -115,8 +116,15 @@ public class WordBehaviour : MonoBehaviour  {
 					go.transform.Rotate (new Vector3 (90, 0, 180));
 					go.transform.localPosition = new Vector3 (cursor, posY, 0);
 					go.transform.localScale = new Vector3 (scale, scale, scale);
-					cursor += rend.bounds.size.x + (scale * padding);
+					cursor += rend.bounds.size.x;
 				}
+			}
+			foreach (Transform t in transform) {
+				Vector3 pos = new Vector3 (
+					t.localPosition.x-(cursor/2), 
+					t.localPosition.y, 
+					t.localPosition.z);
+				t.localPosition = pos;
 			}
 		}
 		else {
@@ -130,7 +138,7 @@ public class WordBehaviour : MonoBehaviour  {
 			rend.sharedMaterial.SetColor("_SpecColor", color);
 			go.transform.parent = transform;
 			go.transform.Rotate (new Vector3 (90, 0, 180));
-			go.transform.localPosition = new Vector3 (cursor, posY, 0);
+			go.transform.localPosition = new Vector3 ((scale * rend.bounds.size.x) / -2, posY, 0);
 			go.transform.localScale = new Vector3 (scale, scale, scale);
 		}
 	}

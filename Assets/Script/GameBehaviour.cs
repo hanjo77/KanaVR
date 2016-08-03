@@ -34,6 +34,7 @@ public class GameBehaviour : MonoBehaviour {
 	private AudioSource _audioSource;
 	private AudioSource _bgAudioSource;
 	private Coroutine _waiter;
+	private bool _isWrong;
 
 	// Use this for initialization
 	void Start () {
@@ -84,8 +85,13 @@ public class GameBehaviour : MonoBehaviour {
 				_maleButton.GetComponent<WordBehaviour> ().PaintObject (Color.blue);
 			} else if (activeKana != null && kanaTable.FindByKana (activeKana.textValue).romaji == currentKana.romaji) {
 				activeKana.PaintObject (Color.green);
-				IncreaseKanaPoints ();
-				score++;
+				if (!_isWrong) {
+					IncreaseKanaPoints ();
+					score++;
+				} else {
+					DecreaseKanaPoints ();
+					lives--;
+				}
 				SpeakWord ("sodesune");
 				GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
 				RemoveWords ();
@@ -93,8 +99,7 @@ public class GameBehaviour : MonoBehaviour {
 			} else if (activeKana != null) {
 				activeKana.PaintObject (Color.red);
 				SpeakWord ("warui");
-				DecreaseKanaPoints ();
-				lives--;
+				_isWrong = true;
 				GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
 			}
 			_prefs.voice = soundVoice;
@@ -104,10 +109,10 @@ public class GameBehaviour : MonoBehaviour {
 	private void IncreaseKanaPoints() {
 		switch (tmpKanaType) {
 		case "hiragana":
-			kanaTable.FindByKana (activeKana.textValue).hiraganaPoints++;
+			currentKana.hiraganaPoints++;
 			break;
 		case "katakana":
-			kanaTable.FindByKana (activeKana.textValue).katakanaPoints++;
+			currentKana.katakanaPoints++;
 			break;
 		}
 	}
@@ -115,36 +120,35 @@ public class GameBehaviour : MonoBehaviour {
 	private void DecreaseKanaPoints() {
 		switch (tmpKanaType) {
 		case "hiragana":
-			if (kanaTable.FindByKana (activeKana.textValue).hiraganaPoints > 0) 
-				kanaTable.FindByKana (activeKana.textValue).hiraganaPoints--;
+			if (currentKana.hiraganaPoints > 0) 
+				currentKana.hiraganaPoints--;
 			break;
 		case "katakana":
-			if (kanaTable.FindByKana (activeKana.textValue).katakanaPoints > 0) 
-				kanaTable.FindByKana (activeKana.textValue).katakanaPoints--;
+			if (currentKana.katakanaPoints > 0) 
+				currentKana.katakanaPoints--;
 			break;
 		}
 	}
 
 	void ShowMenu() {
-		GameObject title = PlaceKana ("かな", Color.yellow, new Vector3(0, 25, 50));
-		title.GetComponent<WordBehaviour> ().isStatic = true;
-		title.GetComponent<WordBehaviour> ().unMovable = true;
-		title.GetComponent<WordBehaviour> ().scale = 2f;
-		GameObject hiraganaButton = PlaceKana ("ひらがな", Color.blue, new Vector3(-50, 0, 50));
-		hiraganaButton.GetComponent<WordBehaviour> ().unMovable = true;
-		GameObject katakanaButton = PlaceKana ("カタカナ", Color.blue, new Vector3(50, 0, 50));
-		katakanaButton.GetComponent<WordBehaviour> ().unMovable = true;
-		GameObject allButton = PlaceKana ("かたまり", Color.blue, new Vector3(0, -20, 50));
-		allButton.GetComponent<WordBehaviour> ().unMovable = true;
+		Place3dText ("hanjo", Color.blue, new Vector3 (0, 0, -50), 4f, false);
+		// Place3dText ("2016", Color.yellow, new Vector3 (-5, -20, -50), 1.5f, false);
+		Place3dText ("かな", Color.yellow, new Vector3 (0, 25, 50), 2f, false);
+		Place3dText ("vr", Color.blue, new Vector3 (0, 45, 70), 6f, false);
+		Place3dText ("ひらがな", Color.blue, new Vector3(-50, 0, 50), 1f, true);
+		Place3dText ("カタカナ", Color.blue, new Vector3(50, 0, 50), 1f, true);
+		Place3dText ("かたまり", Color.blue, new Vector3(0, -20, 50), 1f, true);
+		Place3dText ("voice", Color.yellow, new Vector3(0, 0, 50), 1f, false);
+		_maleButton = Place3dText ("male", (soundVoice == "Otoya" ? Color.yellow : Color.blue), new Vector3(-10, 0, 50), 1f, true);
+		_femaleButton = Place3dText ("female", (soundVoice == "Kyoko" ? Color.yellow : Color.blue), new Vector3(10, 0, 50), 1f, true);
+	}
 
-		GameObject vpiceLabel = PlaceKana ("voice", Color.yellow, new Vector3(0, 0, 50));
-		vpiceLabel.GetComponent<WordBehaviour> ().isStatic = true;
-		vpiceLabel.GetComponent<WordBehaviour> ().unMovable = true;
-		_maleButton = PlaceKana ("male", (soundVoice == "Otoya" ? Color.yellow : Color.blue), new Vector3(-10, 0, 50));
-		_maleButton.GetComponent<WordBehaviour> ().unMovable = true;
-		_femaleButton = PlaceKana ("female", (soundVoice == "Kyoko" ? Color.yellow : Color.blue), new Vector3(10, 0, 50));
-		_femaleButton.GetComponent<WordBehaviour> ().unMovable = true;
-		// StartRound ();
+	GameObject Place3dText(string text, Color color, Vector3 position, float scale, bool isButton) {
+		GameObject label = PlaceKana (text, color, position);
+		if (!isButton) label.GetComponent<WordBehaviour> ().isStatic = true;
+		label.GetComponent<WordBehaviour> ().unMovable = true;
+		label.GetComponent<WordBehaviour> ().scale = scale;
+		return label;
 	}
 
 	IEnumerator WaitForStart()
@@ -201,6 +205,7 @@ public class GameBehaviour : MonoBehaviour {
 	}
 
 	void StartRound() {
+		_isWrong = false;
 		if (kanaType == "katamari") {
 			int rnd = Random.Range (0, 2);
 			tmpKanaType = (rnd == 0 ? "hiragana" : "katakana");
