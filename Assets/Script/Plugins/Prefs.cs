@@ -3,17 +3,20 @@ public class Prefs {
 
 	public string voice;
 	public bool isVr;
+	public int hiScore;
 
 	public void Load()
 	{       
 		voice = PlayerPrefs.GetString("voice", "Otoya"); 
 		isVr = (PlayerPrefs.GetInt ("vr", 0) > 0) ? true : false;
+		hiScore = PlayerPrefs.GetInt ("hiscore", 5);
 	}
 
 	public void Save()
 	{       
 		PlayerPrefs.SetString("voice", voice); 
 		PlayerPrefs.SetInt("vr", (isVr ? 1 : 0)); 
+		PlayerPrefs.SetInt("hiscore", hiScore); 
 	}
 
 	public void SetAll(ref GameBehaviour game)

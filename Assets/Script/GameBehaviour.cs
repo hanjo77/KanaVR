@@ -16,7 +16,8 @@ public class GameBehaviour : MonoBehaviour {
 	public WordBehaviour activeKana;
 	public Kana currentKana;
 	public int score = 0;
-	public int lives = 5;
+	public int startLives = 1;
+	public int lives;
 	public KanaTable kanaTable;
 	public string soundVoice = "Kyoko";
 	public float minDist = 50;
@@ -84,7 +85,9 @@ public class GameBehaviour : MonoBehaviour {
 		if (activeKana && activationTime >= 0 && Time.time - activationTime >= gazeWait) {
 			activationTime = -1f;
 			activeKana.selected = true;
-			if (activeKana.textValue == "ひらがな") {
+			if (activeKana.textValue == "exit") {
+				_waiter = StartCoroutine (WaitForRestart ());
+			} else if (activeKana.textValue == "ひらがな") {
 				kanaType = "hiragana";
 				_waiter = StartCoroutine (WaitForStart ());
 			} else if (activeKana.textValue == "カタカナ") {
@@ -114,15 +117,29 @@ public class GameBehaviour : MonoBehaviour {
 				}
 				SpeakWord ("sodesune");
 				GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
-				RemoveWords ();
 				_waiter = StartCoroutine (WaitForRound ());
 			} else if (activeKana != null) {
-				activeKana.PaintObject (Color.red);
+				ResolveRound ();
 				SpeakWord ("warui");
 				_isWrong = true;
+				DecreaseKanaPoints ();
+				lives--;
+				_waiter = StartCoroutine (WaitForRound ());
 				GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
 			}
 			_prefs.voice = soundVoice;
+		}
+	}
+
+	private void ResolveRound() {
+		foreach (Transform kana in transform) {
+			WordBehaviour word = kana.GetComponent<WordBehaviour> ();
+			if (currentKana.hiragana == word.textValue || currentKana.katakana == word.textValue) {
+				word.PaintObject (Color.green);
+			}
+			else {
+				word.PaintObject (Color.red);
+			}
 		}
 	}
 
@@ -163,6 +180,14 @@ public class GameBehaviour : MonoBehaviour {
 		_femaleButton = Place3dText ("female", (soundVoice == "Kyoko" ? Color.yellow : Color.blue), new Vector3(10, 0, 50), 1f, true);
 	}
 
+	void ShowGameOver() {
+		Place3dText ("game", Color.yellow, new Vector3 (0, 32, 50), 2f, false);
+		Place3dText ("over", Color.yellow, new Vector3 (0, 15, 50), 2f, false);
+		Place3dText (GetText("correct:", score), Color.yellow, new Vector3 (0, 20, 50), 1f, false);
+		Place3dText (GetText("hiscore:", _prefs.hiScore), Color.yellow, new Vector3 (0, 10, 50), 1f, false);
+		Place3dText ("exit", Color.blue, new Vector3(0, -5, 50), 1f, true);
+	}
+
 	GameObject Place3dText(string text, Color color, Vector3 position, float scale, bool isButton) {
 		GameObject label = PlaceKana (text, color, position);
 		if (!isButton) label.GetComponent<WordBehaviour> ().isStatic = true;
@@ -181,19 +206,33 @@ public class GameBehaviour : MonoBehaviour {
 		}
 	}
 
-	IEnumerator WaitForEnd()
+	IEnumerator WaitForRestart()
 	{
+		RemoveWords ();
+		SpeakWord ("gomennasai");
 		while (true) {
 			yield return new WaitForSeconds(3.0f);
 			_gameHUD.SetActive (false);
-			SpeakWord ("gomennasai");
 			ShowMenu ();
+			StopCoroutine (_waiter);
+		}
+	}
+
+	IEnumerator WaitForEnd()
+	{
+		RemoveWords ();
+		SpeakWord ("gomennasai");
+		while (true) {
+			yield return new WaitForSeconds(3.0f);
+			_gameHUD.SetActive (false);
+			ShowGameOver ();
 			StopCoroutine (_waiter);
 		}
 	}
 
 	IEnumerator WaitForRound()
 	{
+		RemoveWords ();
 		GameObject.Find ("RomajiText").GetComponent<TextMesh> ().text = "";
 		while (true) {
 			yield return new WaitForSeconds(2.0f);
@@ -204,7 +243,7 @@ public class GameBehaviour : MonoBehaviour {
 
 	void StartGame() {
 		_prefs.Save ();
-		lives = 5;
+		lives = startLives;
 		score = 0;
 		_isPlaying = true;
 		StartRound ();
@@ -363,7 +402,7 @@ public class GameBehaviour : MonoBehaviour {
 	private string GetJapaneseNumber(int number) {
 		string result = "";
 		string[] numbers = { "零", "一", "二", "三", "四", "五", "六", "七", "八", "九" };
-		if (number < 10) {
+		if (number >= 0 && number < 10) {
 			return numbers [number];
 		}
 		else {
