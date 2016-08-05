@@ -7,12 +7,15 @@ using System.Collections;
 public class SplashScreenBehaviour : MonoBehaviour {
 
 	private bool _adLoaded;
+	private Prefs _prefs;
 	[SerializeField] string iosGameId;
 	[SerializeField] string androidGameId;
 	[SerializeField] bool enableTestMode;
 
 	// Use this for initialization
 	void Start () {
+		_prefs = new Prefs();
+		_prefs.Load();
 		ShowAd ();
 	}
 	
@@ -52,8 +55,17 @@ public class SplashScreenBehaviour : MonoBehaviour {
 		}
 	}
 
-	public void OnPointerUp(BaseEventData eventData)
+	public void OnNoVrPointerUp(BaseEventData eventData)
 	{
+		_prefs.isVr = false;
+		_prefs.Save ();
+		SceneManager.LoadScene ("GameScene");
+	}
+
+	public void OnVrPointerUp(BaseEventData eventData)
+	{
+		_prefs.isVr = true;
+		_prefs.Save ();
 		SceneManager.LoadScene ("GameScene");
 	}
 }

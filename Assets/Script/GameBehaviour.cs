@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
@@ -58,6 +59,9 @@ public class GameBehaviour : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (GvrViewer.Instance.BackButtonPressed) {
+			SceneManager.LoadScene("StartScene");
+		}
 		if (lives < 0) {
 			EndGame ();
 		}
@@ -285,7 +289,7 @@ public class GameBehaviour : MonoBehaviour {
 
 	private void SpeakWord(string word) {
 		AudioClip ac = Resources.Load("Sounds/" + soundVoice + "/_words/" + word) as AudioClip;
-		AudioSource.PlayClipAtPoint(ac, Vector3.zero);
+		AudioSource.PlayClipAtPoint(ac, _gameHUD.transform.position);
 	}
 
 	private float DistanceToKanas(Vector3 pos) {

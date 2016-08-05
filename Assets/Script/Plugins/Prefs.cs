@@ -7,12 +7,13 @@ public class Prefs {
 	public void Load()
 	{       
 		voice = PlayerPrefs.GetString("voice", "Otoya"); 
-		isVr = false; // (PlayerPrefs.GetInt ("vr", 0) > 0) ? true : false;
+		isVr = (PlayerPrefs.GetInt ("vr", 0) > 0) ? true : false;
 	}
 
 	public void Save()
 	{       
 		PlayerPrefs.SetString("voice", voice); 
+		PlayerPrefs.SetInt("vr", (isVr ? 1 : 0)); 
 	}
 
 	public void SetAll(ref GameBehaviour game)
