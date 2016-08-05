@@ -19,7 +19,7 @@ public class GameBehaviour : MonoBehaviour {
 	public int lives = 5;
 	public KanaTable kanaTable;
 	public string soundVoice = "Kyoko";
-	public float minDist = 100;
+	public float minDist = 50;
 	public float randomRangeX = 200;
 	public float randomRangeY = 100;
 	public float randomZ = 250;
@@ -56,7 +56,23 @@ public class GameBehaviour : MonoBehaviour {
 		kanaTable = new KanaTable ();
 		ShowMenu ();
 	}
-	
+
+	public void FocusKana(WordBehaviour kana) {
+		activationTime = Time.time;
+		activeKana = kana;
+		switch (activeKana.textValue) {
+		case "ひらがな":
+			SpeakWord ("hiragana");
+			break;
+		case "カタカナ":
+			SpeakWord ("katakana");
+			break;
+		case "かたまり":
+			SpeakWord ("katamari");
+			break;
+		}
+	}
+
 	// Update is called once per frame
 	void Update () {
 		if (GvrViewer.Instance.BackButtonPressed) {
@@ -157,7 +173,6 @@ public class GameBehaviour : MonoBehaviour {
 
 	IEnumerator WaitForStart()
 	{
-		SpeakWord (kanaType);
 		RemoveWords ();
 		while (true) {
 			yield return new WaitForSeconds(3.0f);
@@ -288,14 +303,14 @@ public class GameBehaviour : MonoBehaviour {
 	}
 
 	private void SpeakWord(string word) {
-		AudioClip ac = Resources.Load("Sounds/" + soundVoice + "/_words/" + word) as AudioClip;
-		AudioSource.PlayClipAtPoint(ac, _gameHUD.transform.position);
+		_audioSource.clip = Resources.Load("Sounds/" + soundVoice + "/_words/" + word) as AudioClip;
+		_audioSource.Play();
 	}
 
 	private float DistanceToKanas(Vector3 pos) {
 		float minDist = 100000;
 		foreach (Transform child in transform) {
-			float dist = Vector3.Distance (child.position, pos);
+			float dist = Vector3.Distance (child.gameObject.GetComponent<WordBehaviour>().position, pos);
 			if (dist < minDist) {
 				minDist = dist;
 			}

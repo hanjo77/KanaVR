@@ -174,8 +174,7 @@ public class WordBehaviour : MonoBehaviour  {
 			PaintObject (Color.cyan);
 		}
 		eventData.selectedObject = selection;
-		game.activationTime = Time.time;
-		game.activeKana = this;
+		game.FocusKana (this);
 	}
 
 	public void OnPointerExit(BaseEventData eventData)
