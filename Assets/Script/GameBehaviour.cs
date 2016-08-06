@@ -134,11 +134,13 @@ public class GameBehaviour : MonoBehaviour {
 	private void ResolveRound() {
 		foreach (Transform kana in transform) {
 			WordBehaviour word = kana.GetComponent<WordBehaviour> ();
-			if (currentKana.hiragana == word.textValue || currentKana.katakana == word.textValue) {
-				word.PaintObject (Color.green);
-			}
-			else {
-				word.PaintObject (Color.red);
+			if (word != null) {
+				if (currentKana.hiragana == word.textValue || currentKana.katakana == word.textValue) {
+					word.PaintObject (Color.green);
+				}
+				else {
+					word.PaintObject (Color.red);
+				}
 			}
 		}
 	}
@@ -193,6 +195,7 @@ public class GameBehaviour : MonoBehaviour {
 		if (!isButton) label.GetComponent<WordBehaviour> ().isStatic = true;
 		label.GetComponent<WordBehaviour> ().unMovable = true;
 		label.GetComponent<WordBehaviour> ().scale = scale;
+		label.transform.parent = transform;
 		return label;
 	}
 
@@ -349,9 +352,11 @@ public class GameBehaviour : MonoBehaviour {
 	private float DistanceToKanas(Vector3 pos) {
 		float minDist = 100000;
 		foreach (Transform child in transform) {
-			float dist = Vector3.Distance (child.gameObject.GetComponent<WordBehaviour>().position, pos);
-			if (dist < minDist) {
-				minDist = dist;
+			if (child.GetComponent<WordBehaviour>() != null) {
+				float dist = Vector3.Distance (child.GetComponent<WordBehaviour>().position, pos);
+				if (dist < minDist) {
+					minDist = dist;
+				}
 			}
 		}
 		return minDist;
@@ -378,14 +383,15 @@ public class GameBehaviour : MonoBehaviour {
 		foreach (MeshExploder exploder in gameObject.GetComponentsInChildren<MeshExploder>()) {
 			exploder.Explode ();
 		}
-		foreach (Transform child in transform) {
-			GameObject.Destroy(child.gameObject);
+		foreach (Transform kanaText in transform) {
+			GameObject.Destroy(kanaText.gameObject);
 		}
 		_activeKanas = new List<Kana> ();
 	}
 
 	public GameObject PlaceKana(string text, Color color, Vector3 position) {
 		GameObject word = new GameObject ();
+		word.tag = "KanaText";
 		word.transform.parent = transform;
 		WordBehaviour wordBehaviour = word.AddComponent<WordBehaviour> ();
 		wordBehaviour.textValue = text;

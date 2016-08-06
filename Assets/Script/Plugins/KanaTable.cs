@@ -102,7 +102,7 @@ namespace AssemblyCSharp
 			case "hiragana":
 				return kanas.FindAll (k => k.hiraganaPoints == min);
 			case "katakana":
-				return kanas.FindAll (k => k.hiraganaPoints == min);
+				return kanas.FindAll (k => k.katakanaPoints == min);
 			}
 			return new List<Kana> ();
 		}

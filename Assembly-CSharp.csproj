@@ -95,6 +95,7 @@
      <Compile Include="Assets\Script\HeadBehaviour.cs" />
      <Compile Include="Assets\Script\HudBehaviour.cs" />
      <Compile Include="Assets\Script\Plugins\KanaTable.cs" />
+     <Compile Include="Assets\Script\Plugins\NumberTable.cs" />
      <Compile Include="Assets\Script\Plugins\Prefs.cs" />
      <Compile Include="Assets\Script\SplashScreenBehaviour.cs" />
      <Compile Include="Assets\Script\TitleBehaviour.cs" />

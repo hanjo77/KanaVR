@@ -20,6 +20,7 @@ public class WordBehaviour : MonoBehaviour  {
 	private GameObject _word;
 	private Vector3 _headPos;
 	private KanaTable _kanaTable;
+	private NumberTable _numberTable;
 	private GameBehaviour _gameController;
 
 	// Use this for initialization
@@ -27,17 +28,20 @@ public class WordBehaviour : MonoBehaviour  {
 
 		_gameController = GameObject.FindGameObjectWithTag ("GameController").GetComponent<GameBehaviour>();
 		_kanaTable = _gameController.kanaTable;
+		_numberTable = new NumberTable();
 
 		WriteText(textValue);
 		_word = gameObject;
+		_word.tag = "KanaText";
 
 		AddBoxCollider (_word);
+		_word.transform.parent = _gameController.transform;
 		_word.transform.position = position;
 
 		Transform vrHead = GvrViewer.Instance.gameObject.transform;
 		Vector3 colliderSize = _word.GetComponent<BoxCollider> ().size;
 		_headPos = vrHead.GetComponentInChildren<Camera>().transform.position;
-		Debug.DrawLine (_headPos, position);
+		// Debug.DrawLine (_headPos, position);
 		Quaternion rotation = Quaternion.LookRotation(_headPos - position);
 		_word.transform.rotation = rotation;
 		_word.transform.Rotate (new Vector3(180, 0, 180));
@@ -76,71 +80,138 @@ public class WordBehaviour : MonoBehaviour  {
 		}
 	}
 
-	void WriteText(string content) {
+	GameObject WriteText(string content) {
 		var cursor = 0f;
 		var height = 0f;
-		GameObject go = Resources.Load ("hiragana/" + content, typeof(GameObject)) as GameObject;
-		if (go == null) {
-			for (var i = 0; i < content.Length; i++) {
-				Kana kana = null;
-				if (i < content.Length - 1) {
-					kana = _kanaTable.FindByKana (content.Substring (i, 2));
+		GameObject go = new GameObject();
+		go.transform.parent = _gameController.transform;
+		go.tag = "KanaText";
+		string[] words = content.Split (':');
+		if (words.Length > 1) {
+			GameObject[] objects = {
+				WriteText (words [0]),
+				WriteText ("dp"),
+				WriteNumber (words [1])
+			};
+			height = -1;
+			foreach (GameObject obj in objects) {
+				obj.transform.parent = _gameController.transform;
+				Renderer rend = obj.GetComponentInChildren<Renderer> ();
+				if (height <= 0) {
+					height = rend.bounds.size.z;
 				}
-				if (kana == null) {
-					kana = _kanaTable.FindByKana (content.Substring (i, 1));
-				}
-				else {
-					i++;
-				}
-				if (kana != null) {
-					string folder = "hiragana/";
-					if (content.Substring (i, 1) == kana.katakana.Substring (kana.katakana.Length - 1, 1)) {
-						folder = "katakana/";
-					}
-					if (i > 0) { 
-						cursor += (scale * padding);
-					}
-					// Debug.Log (folder+kana.romaji);
-					go = Instantiate (Resources.Load (folder+kana.romaji, typeof(GameObject)) as GameObject);
-					Renderer rend = go.GetComponentInChildren<Renderer> ();
-					if (height <= 0) {
-						height = rend.bounds.size.z;
-					}
-					float posY = rend.bounds.size.z - height;
-					if (kana.romaji == "_") {
-						posY += ((height - rend.bounds.size.z) / 2);
-					}
-					if (material) rend.material = this.material;
-					rend.material.SetColor("_SpecColor", color);
-					go.transform.parent = transform;
-					go.transform.Rotate (new Vector3 (90, 0, 180));
-					go.transform.localPosition = new Vector3 (cursor, posY, 0);
-					go.transform.localScale = new Vector3 (scale, scale, scale);
-					cursor += rend.bounds.size.x;
-				}
+				float posY = rend.bounds.size.z - height;
+				if (material)
+					rend.material = this.material;
+				rend.material.SetColor ("_SpecColor", color);
+				go.transform.parent = go.transform;
+				go.transform.Rotate (new Vector3 (90, 0, 180));
+				go.transform.localPosition = new Vector3 (cursor, posY, 0);
+				go.transform.localScale = new Vector3 (scale, scale, scale);
+				cursor += (rend.bounds.size.x + padding) * scale;
 			}
-			foreach (Transform t in transform) {
-				Vector3 pos = new Vector3 (
-					t.localPosition.x-(cursor/2), 
-					t.localPosition.y, 
-					t.localPosition.z);
-				t.localPosition = pos;
+		} else {
+			go = Resources.Load ("hiragana/" + content, typeof(GameObject)) as GameObject;
+			if (go == null) {
+				for (var i = 0; i < content.Length; i++) {
+					Kana kana = null;
+					if (i < content.Length - 1) {
+						kana = _kanaTable.FindByKana (content.Substring (i, 2));
+					}
+					if (kana == null) {
+						kana = _kanaTable.FindByKana (content.Substring (i, 1));
+					} else {
+						i++;
+					}
+					if (kana != null) {
+						string folder = "hiragana/";
+						if (content.Substring (i, 1) == kana.katakana.Substring (kana.katakana.Length - 1, 1)) {
+							folder = "katakana/";
+						}
+						if (i > 0) { 
+							cursor += (scale * padding);
+						}
+						// Debug.Log (folder+kana.romaji);
+						go = Instantiate (Resources.Load (folder + kana.romaji, typeof(GameObject)) as GameObject);
+						Renderer rend = go.GetComponentInChildren<Renderer> ();
+						if (height <= 0) {
+							height = rend.bounds.size.z;
+						}
+						float posY = rend.bounds.size.z - height;
+						if (kana.romaji == "_") {
+							posY += ((height - rend.bounds.size.z) / 2);
+						}
+						if (material)
+							rend.material = this.material;
+						rend.material.SetColor ("_SpecColor", color);
+						go.transform.parent = transform;
+						go.transform.Rotate (new Vector3 (90, 0, 180));
+						go.transform.localPosition = new Vector3 (cursor, posY, 0);
+						go.transform.localScale = new Vector3 (scale, scale, scale);
+						cursor += rend.bounds.size.x;
+					}
+				}
+				foreach (Transform t in transform) {
+					Vector3 pos = new Vector3 (
+						t.localPosition.x - (cursor / 2), 
+						t.localPosition.y, 
+						t.localPosition.z);
+					t.localPosition = pos;
+				}
+			} else {
+				go = Instantiate (go);
+				Renderer rend = go.GetComponentInChildren<Renderer> ();
+				rend.material.SetColor ("_SpecColor", color);
+				go.transform.parent = transform;
+				go.transform.Rotate (new Vector3 (90, 0, 180));
+				go.transform.position = new Vector3 ((rend.bounds.size.x*scale)/-2, 0, 0);
+				go.transform.localScale = new Vector3 (scale, scale, scale);
 			}
 		}
-		else {
-			go = Instantiate (go);
-			Renderer rend = go.GetComponentInChildren<Renderer> ();
-			if (height <= 0) {
-				height = rend.bounds.size.z;
+		return go;
+	}
+
+	GameObject WriteNumber(string content) {
+		var cursor = 0f;
+		var height = 0f;
+		GameObject go = new GameObject();
+		go.tag = "KanaText";
+		go.transform.parent = _gameController.transform;
+		for (var i = 0; i < content.Length; i++) {
+			Kana kana = _numberTable.FindByKana (content.Substring (i, 1));
+			if (kana != null) {
+				string folder = "numbers/";
+				if (i > 0) { 
+					cursor += (scale * padding);
+				}
+				Debug.Log (folder+kana.romaji);
+				go = Instantiate (Resources.Load (folder + kana.romaji, typeof(GameObject)) as GameObject);
+				Renderer rend = go.GetComponentInChildren<Renderer> ();
+				if (height <= 0) {
+					height = rend.bounds.size.z;
+				}
+				float posY = rend.bounds.size.z - height;
+				if (kana.romaji == "_") {
+					posY += ((height - rend.bounds.size.z) / 2);
+				}
+				if (material)
+					rend.material = this.material;
+				rend.material.SetColor ("_SpecColor", color);
+				go.transform.parent = transform;
+				go.transform.Rotate (new Vector3 (90, 0, 180));
+				go.transform.localPosition = new Vector3 (cursor, posY, 0);
+				go.transform.localScale = new Vector3 (scale, scale, scale);
+				cursor += rend.bounds.size.x;
 			}
-			float posY = rend.bounds.size.z - height;
-			if (material) rend.sharedMaterial = this.material;
-			rend.sharedMaterial.SetColor("_SpecColor", color);
-			go.transform.parent = transform;
-			go.transform.Rotate (new Vector3 (90, 0, 180));
-			go.transform.localPosition = new Vector3 ((scale * rend.bounds.size.x) / -2, posY, 0);
-			go.transform.localScale = new Vector3 (scale, scale, scale);
 		}
+		foreach (Transform t in transform) {
+			Vector3 pos = new Vector3 (
+				t.localPosition.x - (cursor / 2), 
+				t.localPosition.y, 
+				t.localPosition.z);
+			t.localPosition = pos;
+		}
+		return go;
 	}
 
 	void AddBoxCollider (GameObject wordObject) {
