@@ -266,9 +266,10 @@ public class GameBehaviour : MonoBehaviour {
 	}
 
 	void StartRound() {
+		Debug.Log ("Start round");
 		_isWrong = false;
 		if (kanaType == "katamari") {
-			int rnd = Random.Range (0, 2);
+			int rnd = Random.Range (0, 1);
 			tmpKanaType = (rnd == 0 ? "hiragana" : "katakana");
 		} else {
 			tmpKanaType = kanaType;
@@ -279,9 +280,7 @@ public class GameBehaviour : MonoBehaviour {
 		GameObject.Find ("LivesText").GetComponent<TextMesh> ().text = GetText("生：", lives);
 
 		currentKana = kanaTable.GetRandomKana(tmpKanaType);
-		while (currentKana.romaji == "Romaji") {
-			currentKana = kanaTable.GetRandomKana(tmpKanaType);
-		}
+		Debug.Log (currentKana.romaji);
 		GameObject.Find ("RomajiText").GetComponent<TextMesh> ().text = currentKana.romaji;
 
 		LoadKanas ();

@@ -18,7 +18,10 @@ namespace AssemblyCSharp
 			foreach (string line in lines) 
 			{
 				string[] lineData = (line.Trim()).Split(';');
-				if (lineData.Length >= 3 && lineData[0].ToLower() != "hiragana") 
+				if (lineData.Length >= 3 
+					&& lineData[0].ToLower() != "romaji" 
+					&& lineData[0].ToLower() != "ts" 
+					&& lineData[0].ToLower() != "_") 
 				{
 					Kana kana = new Kana (lineData [0], lineData [1], lineData [2]);
 					kanas.Add (kana);
@@ -84,7 +87,9 @@ namespace AssemblyCSharp
 		}
 
 		public Kana GetRandomKana(string kanaType) {
-			return FindMinKanas(kanaType)[new System.Random().Next( 1, kanas.Count -2 )];
+			List<Kana> tmpKanas = FindMinKanas (kanaType);
+			int index = new System.Random ().Next (0, tmpKanas.Count - 1);
+			return tmpKanas[index];
 		}
 
 		public List<Kana> FindMinKanas(string kanaType) {
