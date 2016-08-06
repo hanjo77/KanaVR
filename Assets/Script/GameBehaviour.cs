@@ -56,6 +56,9 @@ public class GameBehaviour : MonoBehaviour {
 
 		kanaTable = new KanaTable ();
 		ShowMenu ();
+		/* score = 60;
+		_prefs.hiScore = 4567;
+		ShowGameOver(); */
 	}
 
 	public void FocusKana(WordBehaviour kana) {
@@ -183,11 +186,15 @@ public class GameBehaviour : MonoBehaviour {
 	}
 
 	void ShowGameOver() {
-		Place3dText ("game", Color.yellow, new Vector3 (0, 32, 50), 2f, false);
-		Place3dText ("over", Color.yellow, new Vector3 (0, 15, 50), 2f, false);
-		Place3dText (GetText("correct:", score), Color.yellow, new Vector3 (0, 20, 50), 1f, false);
-		Place3dText (GetText("hiscore:", _prefs.hiScore), Color.yellow, new Vector3 (0, 10, 50), 1f, false);
-		Place3dText ("exit", Color.blue, new Vector3(0, -5, 50), 1f, true);
+		Place3dText ("game", Color.yellow, new Vector3 (0, 47, 50), 2f, false);
+		Place3dText ("over", Color.yellow, new Vector3 (0, 30, 50), 2f, false);
+		if (score > _prefs.hiScore) {
+			_prefs.hiScore = score;
+			_prefs.Save ();
+		}
+		Place3dText (GetText("正：", score), Color.yellow, new Vector3 (0, 15, 50), 1f, false);
+		Place3dText (GetText("高点：", _prefs.hiScore), Color.yellow, new Vector3 (0, 5, 50), 1f, false);
+		Place3dText ("exit", Color.blue, new Vector3(0, -7, 50), 1f, true);
 	}
 
 	GameObject Place3dText(string text, Color color, Vector3 position, float scale, bool isButton) {
@@ -386,6 +393,14 @@ public class GameBehaviour : MonoBehaviour {
 			GameObject.Destroy(kanaText.gameObject);
 		}
 		_activeKanas = new List<Kana> ();
+	}
+
+	public void TogglePause() {
+		if (Time.timeScale > 0) {
+			Time.timeScale = 1;
+		} else {
+			Time.timeScale = 0;
+		}
 	}
 
 	public GameObject PlaceKana(string text, Color color, Vector3 position) {

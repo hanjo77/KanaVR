@@ -86,9 +86,9 @@ public class WordBehaviour : MonoBehaviour  {
 		GameObject go = new GameObject();
 		go.transform.parent = _gameController.transform;
 		go.tag = "KanaText";
-		string[] words = content.Split (':');
+		string[] words = content.Split ('：');
 		if (words.Length > 1) {
-			GameObject[] objects = {
+			/* GameObject[] objects = {
 				WriteText (words [0]),
 				WriteText ("dp"),
 				WriteNumber (words [1])
@@ -96,7 +96,7 @@ public class WordBehaviour : MonoBehaviour  {
 			height = -1;
 			foreach (GameObject obj in objects) {
 				obj.transform.parent = _gameController.transform;
-				Renderer rend = obj.GetComponentInChildren<Renderer> ();
+				Renderer rend = obj.GetComponentsInChildren<Renderer> ();
 				if (height <= 0) {
 					height = rend.bounds.size.z;
 				}
@@ -104,12 +104,27 @@ public class WordBehaviour : MonoBehaviour  {
 				if (material)
 					rend.material = this.material;
 				rend.material.SetColor ("_SpecColor", color);
-				go.transform.parent = go.transform;
-				go.transform.Rotate (new Vector3 (90, 0, 180));
-				go.transform.localPosition = new Vector3 (cursor, posY, 0);
-				go.transform.localScale = new Vector3 (scale, scale, scale);
+				obj.transform.parent = go.transform;
+				// obj.transform.Rotate (new Vector3 (90, 0, 180));
+				obj.transform.localPosition = new Vector3 (cursor, posY, 50);
+				obj.transform.localScale = new Vector3 (scale, scale, scale);
 				cursor += (rend.bounds.size.x + padding) * scale;
 			}
+			cursor -= (padding * scale);
+			go.transform.localPosition = new Vector3 (
+				go.transform.localPosition.x-(cursor / 2),
+				go.transform.localPosition.y,
+				go.transform.localPosition.z
+			); */
+			TextMesh text = go.AddComponent<TextMesh> ();
+			text.text = words[0] + "：" + words[1];
+			text.fontSize = 75;
+			go.transform.localPosition = new Vector3 (
+				(text.text.Length*-text.fontSize)/20,
+				position.y,
+				position.z
+			);
+			go.transform.localScale = new Vector3 (scale, scale, scale);
 		} else {
 			go = Resources.Load ("hiragana/" + content, typeof(GameObject)) as GameObject;
 			if (go == null) {
@@ -185,22 +200,19 @@ public class WordBehaviour : MonoBehaviour  {
 					cursor += (scale * padding);
 				}
 				Debug.Log (folder+kana.romaji);
-				go = Instantiate (Resources.Load (folder + kana.romaji, typeof(GameObject)) as GameObject);
-				Renderer rend = go.GetComponentInChildren<Renderer> ();
+				GameObject tmp = Instantiate (Resources.Load (folder + kana.romaji, typeof(GameObject)) as GameObject);
+				Renderer rend = tmp.GetComponentInChildren<Renderer> ();
 				if (height <= 0) {
 					height = rend.bounds.size.z;
 				}
 				float posY = rend.bounds.size.z - height;
-				if (kana.romaji == "_") {
-					posY += ((height - rend.bounds.size.z) / 2);
-				}
 				if (material)
 					rend.material = this.material;
 				rend.material.SetColor ("_SpecColor", color);
-				go.transform.parent = transform;
-				go.transform.Rotate (new Vector3 (90, 0, 180));
-				go.transform.localPosition = new Vector3 (cursor, posY, 0);
-				go.transform.localScale = new Vector3 (scale, scale, scale);
+				tmp.transform.parent = go.transform;
+				tmp.transform.Rotate (new Vector3 (90, 0, 180));
+				tmp.transform.localPosition = new Vector3 (cursor, posY, 0);
+				tmp.transform.localScale = new Vector3 (scale, scale, scale);
 				cursor += rend.bounds.size.x;
 			}
 		}
