@@ -37,6 +37,18 @@ public class GameBehaviour : MonoBehaviour {
 	private AudioSource _bgAudioSource;
 	private Coroutine _waiter;
 	private bool _isWrong;
+	private string[] goodWords = {
+		"sodesune",
+		"subarashidesu",
+		"sugoi",
+		"haisodesu",
+		"jouzudesu"
+	};
+	private string[] badWords = {
+		"waruidesu",
+		"hetadesu",
+		"iie"
+	};
 
 	// Use this for initialization
 	void Start () {
@@ -118,12 +130,12 @@ public class GameBehaviour : MonoBehaviour {
 					DecreaseKanaPoints ();
 					lives--;
 				}
-				SpeakWord ("sodesune");
+				SpeakWord (GetRandomValue(goodWords));
 				GameObject.Find ("PointsText").GetComponent<TextMesh> ().text = GetText("正：", score);
 				_waiter = StartCoroutine (WaitForRound ());
 			} else if (activeKana != null) {
 				ResolveRound ();
-				SpeakWord ("warui");
+				SpeakWord (GetRandomValue(badWords));
 				_isWrong = true;
 				DecreaseKanaPoints ();
 				lives--;
@@ -219,7 +231,7 @@ public class GameBehaviour : MonoBehaviour {
 	IEnumerator WaitForRestart()
 	{
 		RemoveWords ();
-		SpeakWord ("gomennasai");
+		SpeakWord ("matane");
 		while (true) {
 			yield return new WaitForSeconds(3.0f);
 			_gameHUD.SetActive (false);
@@ -231,7 +243,7 @@ public class GameBehaviour : MonoBehaviour {
 	IEnumerator WaitForEnd()
 	{
 		RemoveWords ();
-		SpeakWord ("gomennasai");
+		SpeakWord ("gameover");
 		while (true) {
 			yield return new WaitForSeconds(3.0f);
 			_gameHUD.SetActive (false);
@@ -276,7 +288,7 @@ public class GameBehaviour : MonoBehaviour {
 		Debug.Log ("Start round");
 		_isWrong = false;
 		if (kanaType == "katamari") {
-			int rnd = Random.Range (0, 1);
+			int rnd = Random.Range (0, 2);
 			tmpKanaType = (rnd == 0 ? "hiragana" : "katakana");
 		} else {
 			tmpKanaType = kanaType;
@@ -417,6 +429,10 @@ public class GameBehaviour : MonoBehaviour {
 
 	private string GetText(string prefix, int number) {
 		return prefix + GetJapaneseNumber(number);
+	}
+
+	private string GetRandomValue(string[] array) {
+		return array [Random.Range (0, array.Length - 1)];
 	}
 
 	private string GetJapaneseNumber(int number) {
