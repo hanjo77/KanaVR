@@ -29,6 +29,7 @@ public class GameBehaviour : MonoBehaviour {
 	public float activationTime;
 	private List<Kana> _activeKanas = new List<Kana> ();
 	private GameObject _gameHUD;
+	private GameObject _pauseHUD;
 	private GameObject _maleButton;
 	private GameObject _femaleButton;
 	private Prefs _prefs;
@@ -66,6 +67,9 @@ public class GameBehaviour : MonoBehaviour {
 		_gameHUD = GameObject.FindGameObjectsWithTag ("GameHUD") [0];
 		_gameHUD.SetActive (false);
 
+		_pauseHUD = GameObject.FindGameObjectsWithTag ("PauseHUD") [0];
+		_pauseHUD.SetActive (false);
+
 		kanaTable = new KanaTable ();
 		ShowMenu ();
 		/* score = 60;
@@ -97,11 +101,19 @@ public class GameBehaviour : MonoBehaviour {
 		if (lives < 0) {
 			EndGame ();
 		}
+		if (
+			(Input.touchCount == 2 && Input.touches[1].phase == TouchPhase.Began) ||
+			(GvrViewer.Instance.VRModeEnabled && GvrViewer.Instance.Triggered && _isPlaying)
+			) {
+			TogglePause ();
+		}
 		if (activeKana && activationTime >= 0 && Time.time - activationTime >= gazeWait) {
 			activationTime = -1f;
 			activeKana.selected = true;
 			if (activeKana.textValue == "exit") {
 				_waiter = StartCoroutine (WaitForRestart ());
+			} else if (activeKana.textValue == "pause") {
+				TogglePause();
 			} else if (activeKana.textValue == "ひらがな") {
 				kanaType = "hiragana";
 				_waiter = StartCoroutine (WaitForStart ());
@@ -224,6 +236,7 @@ public class GameBehaviour : MonoBehaviour {
 		while (true) {
 			yield return new WaitForSeconds(3.0f);
 			StartGame ();
+			// TogglePause ();
 			StopCoroutine (_waiter);
 		}
 	}
@@ -268,6 +281,7 @@ public class GameBehaviour : MonoBehaviour {
 		lives = startLives;
 		score = 0;
 		_isPlaying = true;
+		Place3dText ("pause", Color.blue, new Vector3 (0, 0, -50), 1f, true);
 		StartRound ();
 	}
 
@@ -405,13 +419,29 @@ public class GameBehaviour : MonoBehaviour {
 			GameObject.Destroy(kanaText.gameObject);
 		}
 		_activeKanas = new List<Kana> ();
+		GameObject.FindObjectOfType<GvrReticle> ().ResetReticle ();
 	}
 
 	public void TogglePause() {
-		if (Time.timeScale > 0) {
-			Time.timeScale = 1;
-		} else {
-			Time.timeScale = 0;
+		if (_isPlaying) {
+			if (Time.timeScale > 0) {
+				Time.timeScale = 0;
+				_gameHUD.SetActive(false);
+				_pauseHUD.SetActive (true);
+				Debug.Log ("pause");
+			} else {
+				Time.timeScale = 1;
+				_gameHUD.SetActive(true);
+				_pauseHUD.SetActive (false);
+				Debug.Log ("continue");
+			}
+		}
+	}
+
+	private void SetActiveByTagName(string tagName, bool active) {
+		GameObject[] gameHUDs = GameObject.FindGameObjectsWithTag (tagName);
+		foreach (GameObject hud in gameHUDs) {
+			hud.SetActive (active);
 		}
 	}
 

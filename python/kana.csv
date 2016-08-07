@@ -105,7 +105,7 @@ correct;正;正
 hiscore;高点;高点
 game;ゲーム;ゲーム
 over;オーバー;オーバー
-exit;出;出
+exit;出る;出る
 zero;零;零
 ichi;一;一
 nii;二;二
@@ -120,3 +120,5 @@ juu;十;十
 hyaku;百;百
 sen;千;千
 man;万;万
+pause;休止;休止
+continue;続ける;続ける

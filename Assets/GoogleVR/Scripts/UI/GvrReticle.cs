@@ -103,7 +103,7 @@ public class GvrReticle : MonoBehaviour, IGvrGazePointer {
   /// ray sent from the camera on the object.
   public void OnGazeStay(Camera camera, GameObject targetObject, Vector3 intersectionPosition,
                          bool isInteractive) {
-    SetGazeTarget(intersectionPosition, isInteractive);
+	SetGazeTarget (intersectionPosition, isInteractive);
   }
 
   /// Called when the user's look no longer intersects an object previously
@@ -114,10 +114,14 @@ public class GvrReticle : MonoBehaviour, IGvrGazePointer {
   /// The camera is the event camera and the target is the object the user
   /// previously looked at.
   public void OnGazeExit(Camera camera, GameObject targetObject) {
-    reticleDistanceInMeters = kReticleDistanceMax;
-    reticleInnerAngle = kReticleMinInnerAngle;
-    reticleOuterAngle = kReticleMinOuterAngle;
+		ResetReticle ();
   }
+
+	public void ResetReticle() {
+		reticleDistanceInMeters = kReticleDistanceMax;
+		reticleInnerAngle = kReticleMinInnerAngle;
+		reticleOuterAngle = kReticleMinOuterAngle;
+	}
 
   /// Called when a trigger event is initiated. This is practically when
   /// the user begins pressing the trigger.
