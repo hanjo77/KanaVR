@@ -2,13 +2,14 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Script/GameBehaviour.cs">
     <Files>
+      <File FileName="Assets/Script/WordBehaviour.cs" Line="285" Column="1" />
       <File FileName="Assets/Script/Plugins/Prefs.cs" Line="24" Column="2" />
-      <File FileName="Assets/Script/WordBehaviour.cs" Line="23" Column="40" />
       <File FileName="Assets/Script/TitleBehaviour.cs" Line="21" Column="1" />
-      <File FileName="Assets/Script/GameBehaviour.cs" Line="107" Column="15" />
-      <File FileName="Assets/GoogleVR/Scripts/Controller/Internal/Emulator/PhoneEvent.cs" Line="19" Column="1" />
-      <File FileName="Assets/Script/SplashScreenBehaviour.cs" Line="48" Column="3" />
-      <File FileName="Assets/Script/Plugins/KanaTable.cs" Line="2" Column="11" />
+      <File FileName="Assets/Script/GameBehaviour.cs" Line="107" Column="4" />
+      <File FileName="Assets/Script/Plugins/KanaTable.cs" Line="22" Column="41" />
+      <File FileName="Assets/Script/SplashScreenBehaviour.cs" Line="31" Column="47" />
+      <File FileName="Assets/Script/HudBehaviour.cs" Line="1" Column="1" />
+      <File FileName="Assets/Script/HeadBehaviour.cs" Line="18" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
@@ -16,8 +17,7 @@
       <Breakpoint file="/Users/hanjo/Workspace/KanaVR/Assets/Script/TextBehaviour.cs" line="48" column="1" />
       <Breakpoint file="/Users/hanjo/Workspace/KanaVR/Assets/Script/TextBehaviour.cs" line="61" column="1" />
       <Breakpoint file="/Users/hanjo/Workspace/KanaVR/Assets/Script/TextBehaviour.cs" line="57" column="1" />
-      <Breakpoint file="/Users/hanjo/Workspace/KanaVR/Assets/Script/GameBehaviour.cs" line="88" column="1" />
-      <Breakpoint file="/Users/hanjo/Workspace/KanaVR/Assets/Script/GameBehaviour.cs" line="117" column="1" />
+      <Breakpoint file="/Users/hanjo/Workspace/KanaVR/Assets/Script/WordBehaviour.cs" line="196" column="1" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

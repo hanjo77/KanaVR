@@ -23,32 +23,24 @@ args = get_args()
 scene = bpy.context.scene
 bpy.ops.object.mode_set(mode='OBJECT')
 
-# bpy.ops.wm.read_homefile()
-
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete()
 
-# bpy.ops.import_curve.svg(filepath='/media/psf/Home/Workspace/KanaVR/python/svg/か-nu.svg', filter_glob="*.svg")
-# bpy.ops.import_curve.svg(filepath='/Users/hanjo/Downloads/ポ-nu.svg', filter_glob="*.svg")
 bpy.ops.import_curve.svg(filepath=args.input, filter_glob="*.svg")
-bpy.data.objects[0].select = True
-scene.objects.active = bpy.data.objects[0]
+i = 0
+for tmp in bpy.data.objects:
+  tmp.select = True
+  scene.objects.active = tmp
+bpy.ops.object.join()
 bpy.ops.object.select_pattern(pattern="Curve")
 bpy.ops.object.convert(target="MESH")
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_mode(type='FACE')
 bpy.ops.mesh.select_all(action='SELECT')
 bpy.ops.mesh.normals_make_consistent(inside=False)
-bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={"mirror":False}, TRANSFORM_OT_translate={"value":(0, 0, 0.0001)})
-# bpy.ops.mesh.fill()
-
-# bpy.ops.object.mode_set( mode = 'OBJECT' )
-# bpy.ops.mesh.normals_make_consistent(inside=False)
 bpy.ops.object.mode_set(mode='OBJECT')
 bpy.ops.transform.resize(value=(100.0, 100.0, 100.0))
 obj = bpy.context.active_object
 dm = obj.modifiers.new('Solidify','SOLIDIFY')
-# bpy.ops.export_scene.fbx(filepath=args.output, axis_forward='-Z', axis_up='Y')
-bpy.ops.export_scene.obj(filepath=args.output, axis_forward='-Z', axis_up='Y', use_normals=True)
+bpy.ops.export_scene.obj(filepath=args.output, axis_forward='Y', axis_up='Z', use_normals=True)
 print ('Writing to ' + args.output)
-# bpy.ops.wm.save_as_mainfile(filepath=args.output)
