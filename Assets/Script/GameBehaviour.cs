@@ -25,6 +25,7 @@ public class GameBehaviour : MonoBehaviour {
 	public float randomRangeY = 100;
 	public float randomZ = 250;
 	public float backgroundVolume = .7f;
+	public string wanikaniKey;
 
 	public float activationTime;
 	private List<Kana> _activeKanas = new List<Kana> ();
@@ -72,6 +73,9 @@ public class GameBehaviour : MonoBehaviour {
 
 		kanaTable = new KanaTable ();
 		ShowMenu ();
+		Speaker speaker = gameObject.AddComponent<Speaker> ();
+		speaker.SetVoice (soundVoice);
+		speaker.Say ("いらっしゃいませ");
 		/* score = 60;
 		_prefs.hiScore = 4567;
 		ShowGameOver(); */

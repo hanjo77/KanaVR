@@ -27,11 +27,11 @@ public class Speaker : MonoBehaviour
 	void Update() {
 		AudioSource audioSource = _audioSources [activeSource];
 		if (currentClip < _clips.Count) {
-			if (!audioSource.isPlaying) {
+			if (!audioSource.isPlaying || audioSource.time > audioSource.clip.length-.01f) {
 				activeSource = (activeSource == 0 ? 1 : 0);
 				audioSource = _audioSources [activeSource];
 				audioSource.clip = _clips [currentClip];
-				audioSource.Play ();
+				audioSource.PlayDelayed (.01f);
 				currentClip++;
 			}
 		} else {

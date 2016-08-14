@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.Advertisements;
@@ -8,6 +9,9 @@ public class SplashScreenBehaviour : MonoBehaviour {
 
 	private bool _adLoaded;
 	private Prefs _prefs;
+	public GameObject startCanvas;
+	public GameObject loginCanvas;
+	private InputField _apiKeyInput;
 	[SerializeField] string iosGameId;
 	[SerializeField] string androidGameId;
 	[SerializeField] bool enableTestMode;
@@ -16,6 +20,7 @@ public class SplashScreenBehaviour : MonoBehaviour {
 	void Start () {
 		_prefs = new Prefs();
 		_prefs.Load();
+
 		ShowAd ();
 	}
 	
@@ -67,5 +72,30 @@ public class SplashScreenBehaviour : MonoBehaviour {
 		_prefs.isVr = true;
 		_prefs.Save ();
 		SceneManager.LoadScene ("GameScene");
+	}
+
+	public void OnWanikaniPointerUp(BaseEventData eventData)
+	{
+		ShowLogin (true);
+		_apiKeyInput = GameObject.FindGameObjectWithTag ("apiKeyInput").GetComponent<InputField> ();
+		_apiKeyInput.text = _prefs.wanikaniKey;
+	}
+		
+	public void OnWanikaniSave()
+	{
+		_prefs.wanikaniKey = _apiKeyInput.text;
+		_prefs.Save ();
+		ShowLogin (false);
+	}
+
+	public void OnWanikaniCancel()
+	{
+		ShowLogin (false);
+	}
+
+	public void ShowLogin(bool visible)
+	{
+		loginCanvas.SetActive (visible);
+		startCanvas.SetActive (!visible);
 	}
 }
