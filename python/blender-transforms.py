@@ -30,9 +30,9 @@ bpy.ops.import_curve.svg(filepath=args.input, filter_glob="*.svg")
 i = 0
 for tmp in bpy.data.objects:
   tmp.select = True
-  scene.objects.active = tmp
+scene.objects.active = bpy.data.objects[0]
 bpy.ops.object.join()
-bpy.ops.object.select_pattern(pattern="Curve")
+# bpy.ops.object.select_pattern(pattern="Curve")
 bpy.ops.object.convert(target="MESH")
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_mode(type='FACE')

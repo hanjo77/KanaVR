@@ -39,5 +39,5 @@ for lst in lists:
                   print obj
                   continue
             char = obj["character"].encode('utf-8')
-            call(["./text-3d.sh", char, args.output])
+            call(["./text-to-obj.sh", char, args.output])
 
